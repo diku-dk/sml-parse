@@ -1,0 +1,7 @@
+
+local $(SML_LIB)/basis/basis.mlb
+      ../parse.mlb
+      ../simple_token.mlb
+in
+   test1.sml
+end

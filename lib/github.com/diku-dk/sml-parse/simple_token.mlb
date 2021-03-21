@@ -1,0 +1,7 @@
+local
+  $(SML_LIB)/basis/basis.mlb
+  parse.mlb
+in
+  SIMPLE_TOKEN.sig
+  SimpleToken.sml
+end
