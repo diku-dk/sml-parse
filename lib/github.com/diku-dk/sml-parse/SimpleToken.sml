@@ -13,6 +13,15 @@ fun pp_token t =
       | Id s => s
       | Num s => s
 
+fun iter (i:int) (f : 'a -> 'a) (a:'a) : 'a =
+    if i <= 0 then a
+    else iter (i-1) f (f a)
+
+fun close (con:string -> token) (l:loc) (s:string) : token * reg =
+    let val l' = iter (size s - 1) Region.next l
+    in (con s, (l,l'))
+    end
+
 datatype state = IdS of loc * string
                | SymbS of loc * string
                | NumS of loc * string
@@ -36,39 +45,39 @@ fun tokenise {sep_chars         : string,                  (* single-char symbol
               else (l',CommentS(l0, ""),ts)
             | CommentS(l0,"(") =>
               if c = #"*" then (l',CommentS(l0,""),ts)
-              else (l',BeginS,(Symb "(", (l0,l0))::ts)
+              else next (l,l',c,BeginS,close Symb l0 "(" :: ts)
             | CommentS (l0,"") =>
               if c = #"*" then (l',CommentS(l0,"*"),ts)
               else (l',CommentS(l0,""),ts)
             | BeginS =>
-              if c = #"(" then (l',CommentS (l',"("),ts)
-              else if isSepChar c then (l',BeginS,(Symb(String.str c),(l,l))::ts)
+              if c = #"(" then (l',CommentS (l,"("),ts)
+              else if isSepChar c then (l',BeginS,close Symb l (String.str c)::ts)
               else if isSymbChar c then (l',SymbS(l,String.str c),ts)
               else if isIdChar0 c then (l',IdS(l,String.str c),ts)
               else if Char.isDigit c then (l',NumS(l,String.str c),ts)
               else if Char.isSpace c then (l',BeginS,ts)
               else raise Fail ("lex error at location " ^ Region.ppLoc l')
             | SymbS (l0,s) =>
-              if c = #"(" then (l',CommentS (l',"("),(Symb s,(l0,l))::ts)
-              else if isSepChar c then (l',BeginS,(Symb(String.str c),(l',l'))::(Symb s,(l0,l))::ts)
+              if c = #"(" then (l',CommentS (l,"("), close Symb l0 s :: ts)
+              else if isSepChar c then (l',BeginS,close Symb l (String.str c) :: close Symb l0 s :: ts)
               else if isSymbChar c then (l',SymbS(l0,s ^ String.str c),ts)
-              else if Char.isDigit c then (l',NumS(l',String.str c),(Symb s,(l0,l))::ts)
-              else if isIdChar0 c then (l',IdS(l',String.str c),(Symb s,(l0,l))::ts)
-              else if Char.isSpace c then (l',BeginS,(Symb s,(l0,l))::ts)
+              else if Char.isDigit c then (l',NumS(l,String.str c), close Symb l0 s :: ts)
+              else if isIdChar0 c then (l',IdS(l,String.str c), close Symb l0 s :: ts)
+              else if Char.isSpace c then (l',BeginS, close Symb l0 s :: ts)
               else raise Fail ("lex error at location " ^ Region.ppLoc l')
             | NumS (l0,s) =>
-              if c = #"(" then (l',CommentS (l',"("),(Num s,(l0,l))::ts)
-              else if isSepChar c then (l',BeginS,(Symb(String.str c),(l',l'))::(Num s,(l0,l))::ts)
-              else if isSymbChar c then (l',SymbS(l',String.str c),(Num s,(l0,l))::ts)
+              if c = #"(" then (l',CommentS (l,"("), close Num l0 s ::ts)
+              else if isSepChar c then (l',BeginS, close Symb l (String.str c) :: close Num l0 s :: ts)
+              else if isSymbChar c then (l',SymbS(l,String.str c), close Num l0 s :: ts)
               else if is_num(s ^ String.str c) then (l',NumS(l0,s ^ String.str c),ts)
-              else if Char.isSpace c then (l',BeginS,(Num s,(l0,l))::ts)
+              else if Char.isSpace c then (l',BeginS, close Num l0 s :: ts)
               else raise Fail ("lex error at location " ^ Region.ppLoc l')
             | IdS (l0,s) =>
-              if c = #"(" then (l',CommentS (l',"("),(Id s,(l0,l))::ts)
-              else if isSepChar c then (l',BeginS,(Symb(String.str c),(l',l'))::(Id s,(l0,l))::ts)
-              else if isSymbChar c then (l',SymbS(l',String.str c),(Id s,(l0,l))::ts)
+              if c = #"(" then (l',CommentS (l,"("), close Id l0 s :: ts)
+              else if isSepChar c then (l',BeginS, close Symb l (String.str c) :: close Id l0 s :: ts)
+              else if isSymbChar c then (l',SymbS(l,String.str c), close Id l0 s :: ts)
               else if is_id (s ^ String.str c) then (l',IdS(l0,s ^ String.str c),ts)
-              else if Char.isSpace c then (l',BeginS,(Id s,(l0,l))::ts)
+              else if Char.isSpace c then (l',BeginS, close Id l0 s :: ts)
               else raise Fail ("lex error at location " ^ Region.ppLoc l')
             | CommentS _ => raise Fail "lex: impossible"
 
@@ -81,9 +90,9 @@ fun tokenise {sep_chars         : string,                  (* single-char symbol
                                end) s0 input
       val ts =
           case s of
-              SymbS(l,s) => (Symb s,(l,l'))::ts
-            | NumS(l,s) => (Num s,(l,l'))::ts
-            | IdS(l,s) => (Id s,(l,l'))::ts
+              SymbS(l,s) => close Symb l s :: ts
+            | NumS(l,s) => close Num l s :: ts
+            | IdS(l,s) => close Id l s :: ts
             | CommentS _ => raise Fail "lex error: non-closed comment"
             | BeginS => ts
     in rev ts

@@ -13,6 +13,7 @@ signature PARSE = sig
   val >>- : 'a p * unit p -> 'a p
   val ??  : 'a p * 'b p -> ('a*'b -> 'a) -> 'a p
   val ??? : 'a p * 'b p -> ('a*'b*Region.reg -> 'a) -> 'a p
+  val ??* : 'a p * 'b p -> ('a*'b -> 'a) -> 'a p
   val ||  : 'a p * 'a p -> 'a p
   val oo  : 'a p * ('a -> 'b) -> 'b p
   val ign : 'a p -> unit p
@@ -40,6 +41,10 @@ both succeeds, combines the parse results using `f`.
 
 [(a ??? b) f] is defined as `??`, but allows for passing region
 information to `f`.
+
+[(a ??* b) f] first parses using `a` followed by parsing zero or more
+times using `b`, while iteratively combining successful parse results
+using `f`.
 
 [a || b] returns a parser that first attempts to parse using `a`. On
 success, the result is returned. Otherwise, returns the result of

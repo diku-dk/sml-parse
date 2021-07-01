@@ -13,7 +13,7 @@ type locerr = loc * (unit -> string)
 
 type 'a p = (token*reg)list -> ('a * reg * (token*reg)list, locerr) either
 
-infix >>> ->> >>- ?? ??? || oo oor
+infix >>> ->> >>- ?? ??? || oo oor ??*
 
 fun maxLocerr (l1:locerr) l2 =
     if Region.lt (#1 l1) (#1 l2) then l2
@@ -68,6 +68,17 @@ fun p1 || p2 = fn ts =>
       | NO l1 => case p2 ts of
                     OK(v,r,ts) => OK(v,r,ts)
                   | NO l2 => NO (maxLocerr l1 l2)
+
+fun p1 ??* p2 = fn f => fn ts =>
+    case p1 ts of
+        OK(v1,r1,ts) =>
+        let fun repeat (v1,r1,ts) =
+                case p2 ts of
+                    OK(v2,r2,ts) => repeat (f(v1,v2), Region.plus "??*" r1 r2, ts)
+                  | _ => OK(v1,r1,ts)
+        in repeat (v1,r1,ts)
+        end
+      | NO l => NO l
 
 fun ign p ts =
     case p ts of
