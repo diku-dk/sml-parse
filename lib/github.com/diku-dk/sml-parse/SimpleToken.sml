@@ -61,7 +61,10 @@ fun tokenise {sep_chars         : string,                  (* single-char symbol
               if c = #"(" then (l',CommentS (l,"("), close Symb l0 s :: ts)
               else if isSepChar c then (l',BeginS,close Symb l (String.str c) :: close Symb l0 s :: ts)
               else if isSymbChar c then (l',SymbS(l0,s ^ String.str c),ts)
-              else if Char.isDigit c then (l',NumS(l,String.str c), close Symb l0 s :: ts)
+              else if Char.isDigit c then
+                (if is_num (s ^ String.str c) then
+                   (l',NumS(l0, s ^ String.str c), ts)
+                 else (l',NumS(l,String.str c), close Symb l0 s :: ts))
               else if isIdChar0 c then (l',IdS(l,String.str c), close Symb l0 s :: ts)
               else if Char.isSpace c then (l',BeginS, close Symb l0 s :: ts)
               else raise Fail ("lex error at location " ^ Region.ppLoc l')
