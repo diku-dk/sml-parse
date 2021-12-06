@@ -2,7 +2,7 @@
 MLCOMP ?= mlkit
 
 .PHONY: test
-test: test1.res
+test: test1.res test2.res
 	cat $^
 
 %.res: %.out

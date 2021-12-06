@@ -1,0 +1,13 @@
+Lexing string:
+ "let y = 82 + 2 in let x = 454 in y + x + y (* ok *)    + 23"
+Tokens: 
+ [let, y, =, 82, +, 2, in, let, x, =, 454, in, y, +, x, +, y, (, *, ok, *, ), +, 23]
+Lexing string:
+ "let y = 82 + 2 in let x = & 454 in y + x + y (* ok *)   + 23"
+ERROR: Error at position 26: expecting token
+Lexing string:
+ "let y = 82 + 2 in let x = 454 in y + x + y (* ok *)    + 23"
+Value: 645
+Lexing string:
+ "let y = 82 + 2 in let x = & 454 in y + x + y (* ok *)   + 23"
+ERROR: Error at position 26: expecting token

@@ -1,0 +1,6 @@
+local
+  $(SML_LIB)/basis/basis.mlb
+  ../scan-util.mlb
+in
+  test2.sml
+end

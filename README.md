@@ -1,8 +1,14 @@
 # sml-parse [![CI](https://github.com/diku-dk/sml-parse/workflows/CI/badge.svg)](https://github.com/diku-dk/sml-parse/actions)
 
-Standard ML Parser Combinator Library.
+Standard ML Parser Combinator Library and Scan Utilities.
 
 ## Overview of MLB files
+
+- `lib/github.com/diku-dk/sml-parse/scan-util.mlb`:
+
+  - **signature** [`SCAN_UTIL`](lib/github.com/diku-dk/sml-parse/SCAN_UTIL.sig)
+  - **structure** `ScanUtil` :> `SCAN_UTIL`
+
 
 - `lib/github.com/diku-dk/sml-parse/parse.mlb`:
 
