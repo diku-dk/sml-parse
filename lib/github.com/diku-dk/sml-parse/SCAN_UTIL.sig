@@ -31,7 +31,6 @@ sig
   val ??  : ('a,'st) p * ('a -> 'b option) -> ('b,'st) p
 
   val ign : ('a,'st) p -> (unit,'st) p
-
   val con : string * 'a -> ('a,'st) p
   val str : string -> (string,'st) p
   val eos : (unit,'st) p
@@ -39,12 +38,16 @@ sig
   val scanChar  : (char -> bool) -> (char,'st) p
   val scanChars : (char -> bool) -> (string,'st) p
 
+  val list      : ('a,'st) p -> ('a list,'st) p
+  val option    : ('a,'st) p -> ('a option,'st) p
+
   val skipChars : (char -> bool) -> ('a,'st) p -> ('a,'st) p
+  val skipWS    : ('a,'st) p -> ('a,'st) p
+  val noSkipWS  : ('a,'st) p -> ('a,'st) p
 
-  val skipWS   : ('a,'st) p -> ('a,'st) p
-  val noSkipWS : ('a,'st) p -> ('a,'st) p
+  val remainder : (string,'st) p
 
-  val scanId   : (string,'st) p
+  val scanId    : (string,'st) p
 end
 
 (**
@@ -105,6 +108,16 @@ for which each character satisfies the predicate `P`.
 
 [skipChars P p] returns a scanner identical to `p` but that skips
 initial characters that satisfy the predicate `P`.
+
+[list p] returns a scanner that constructs a list of values by
+repeatedly scanning using p until p does not succeed.
+
+[option p] returns a scanner that constructs an option value by trying
+to scan using p.
+
+[remainder] scans all remaining characters (until end-of-stream). For
+large input streams, it may be more efficient to apply a
+state-specific extractor.
 
 [scanId] returns a scanner that scans identifiers consisting of an
 initial alphabetic character followed by zero or more alpha-numerical

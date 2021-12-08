@@ -96,6 +96,24 @@ fun noSkipWS p get s =
 
 fun skipWS p = skipChars Char.isSpace p
 
+fun option p g s =
+    case p g s of
+        SOME(v,s) => SOME(SOME v,s)
+      | NONE => SOME(NONE,s)
+
+fun list p g s =
+    let fun loop s acc =
+            case p g s of
+                NONE => SOME(rev acc,s)
+              | SOME(e,s) => loop s (e::acc)
+    in loop s nil
+    end
+
+fun scanAnyChar get s = get s
+
+fun remainder get =
+    (list scanAnyChar >>@ implode >>- eos) get
+
 fun scanId get =
     (scanChar Char.isAlpha >>@ String.str >>?
      scanChars Char.isAlphaNum
