@@ -1,5 +1,9 @@
-(** Simple parser combinator library that keeps track of position
-    information.
+(** Simple parser combinator library.
+
+This parser combinator library provides a series of combinators for
+assembling parsers. The library also keeps track of position
+information, which makes it ideal for providing good error messages.
+
 *)
 
 signature PARSE = sig

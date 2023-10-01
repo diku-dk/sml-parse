@@ -7,12 +7,12 @@ ML Basis Library (i.e., StringCvt.reader).
 
 A scanner (or parser) of type `('a,'st) p` parses values of type
 `'a`. Such a parser is a function that takes a char-reader (of type
-(char,'st) reader`, and returns a reader that reads values of type
+`(char,'st) reader`, and returns a reader that reads values of type
 `'a`.
 
 When opening ScanUtil, include the following infix-declaration:
 
-  infix >>> ->> >>- >>? || >>@ >>* ??
+    infix >>> ->> >>- >>? || >>@ >>* ??
 
 *)
 
@@ -51,8 +51,6 @@ sig
 end
 
 (**
-
-Description:
 
 [type ('a,'st) reader] The generic reader type, which is a type
 abbreviation for the type `'st -> ('a * 'st) option`.
