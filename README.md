@@ -9,7 +9,6 @@ Standard ML Parser Combinator Library and Scan Utilities.
   - **signature** [`SCAN_UTIL`](lib/github.com/diku-dk/sml-parse/SCAN_UTIL.sig)
   - **structure** `ScanUtil` :> `SCAN_UTIL`
 
-
 - `lib/github.com/diku-dk/sml-parse/parse.mlb`:
 
   - **signature** [`REGION`](lib/github.com/diku-dk/sml-parse/REGION.sig)
@@ -17,6 +16,10 @@ Standard ML Parser Combinator Library and Scan Utilities.
   - **structure** `Region` :> `REGION`
   - **structure** `Parse` :> `PARSE`
 
+- `lib/github.com/diku-dk/sml-parse/char_token.mlb`:
+
+  - **signature** [`CHAR_TOKEN`](lib/github.com/diku-dk/sml-parse/CHAR_TOKEN.sig)
+  - **structure** `CharToken` :> `CHAR_TOKEN`
 
 - `lib/github.com/diku-dk/sml-parse/simple_token.mlb`:
 
