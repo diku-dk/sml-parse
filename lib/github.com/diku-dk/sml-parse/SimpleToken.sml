@@ -19,7 +19,7 @@ fun iter (i:int) (f : 'a -> 'a) (a:'a) : 'a =
 
 fun close (con:string -> token) (l:loc) (s:string) : token * reg =
     let val l' = iter (size s - 1) Region.next l
-    in (con s, (l,l'))
+    in (con s, Region.mkReg(l,l'))
     end
 
 datatype state = IdS of loc * string

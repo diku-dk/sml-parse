@@ -21,7 +21,7 @@ fun tokenise {srcname:string, input:string} : (token*reg) list =
             let val l' = if c = #"\n" then Region.newline l
                          else if Char.isPrint c then Region.next l
                          else l
-            in (l', (c,(l,l))::ts)
+            in (l', (c,Region.mkReg(l,l))::ts)
             end
         val (_,ts) = CharVector.foldl next (Region.loc0 srcname, nil) input
     in rev ts

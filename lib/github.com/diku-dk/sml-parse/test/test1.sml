@@ -51,59 +51,46 @@ fun eval (E:env) (e:e) : int =
       | Var x => look E x
       | Add(e1,e2) => eval E e1 + eval E e2
 
-fun locOfTs nil = Region.botloc
-  | locOfTs ((_,(l,_))::_) = l
+infix >>=
 
 val p_int : int p =
- fn ts =>
-    case ts of
-        (T.Num n,r)::ts' =>
-        (case Int.fromString n of
-             SOME n => OK (n,r,ts')
-           | NONE => NO(locOfTs ts, fn () => "int"))
-      | _ => NO(locOfTs ts, fn () => "int")
+    next >>= (fn T.Num n => (case Int.fromString n of
+                                 SOME n => accept n
+                               | NONE => reject "expecting int")
+               | _ => reject "expecting int")
 
-val p_kw : string -> unit p =
- fn s => fn ts =>
-    case ts of
-        (T.Id k,r)::ts' =>
-        if k = s then OK ((),r,ts')
-        else NO(locOfTs ts, fn () => "kw")
-      | _ => NO(locOfTs ts, fn () => "kw")
+fun qq s = "'" ^ s ^ "'"
+
+fun p_kw (s:string) : unit p =
+    next >>= (fn T.Id k =>
+                 if k = s then accept ()
+                 else reject ("expecting keyword " ^ qq s)
+               | _ => reject ("expecting keyword " ^ qq s))
 
 val p_var : string p =
- fn ts =>
-    case ts of
-        (T.Id k,r)::ts' => OK (k,r,ts')
-      | _ => NO(locOfTs ts, fn () => "var")
+    next >>= (fn T.Id k => accept k | _ => reject "expecting variable")
 
-val p_symb : string -> unit p =
- fn s => fn ts =>
-    case ts of
-        (T.Symb k,r)::ts' =>
-        if k = s then OK ((),r,ts')
-        else NO(locOfTs ts, fn () => "var")
-      | _ => NO(locOfTs ts, fn () => "var")
+fun p_symb (s:string) : unit p =
+    next >>= (fn T.Symb k =>
+                 if k = s then accept ()
+                 else reject ("expecting symbol " ^ qq s)
+               | _ => reject ("expecting symbol " ^ qq s))
 
-infix >>> ->> >>- oo || ??
+infixr <|> *> <*
+infix >>> ?? <*> <$> <$$>
 
-val rec p_e : e p =
- fn ts =>
-  (    (((((p_kw "let" ->> p_var) >>> ((p_symb "=" ->> p_e) >>> (p_kw "in" ->> p_e))) oo (fn (v,(e1,e2)) => Let(v,e1,e2))) ?? p_next) (fn (e,f) => f e))
-    || (((p_var oo Var) ?? p_next) (fn (e,f) => f e))
-    || (((p_int oo Int) ?? p_next) (fn (e,f) => f e))
-  ) ts
+fun delay0 p = delay p ()
 
-and p_next : (e -> e) p =
-    fn ts =>
-     (    ((p_symb "+" ->> p_e) oo (fn e2 => fn e1 => Add(e1,e2)))
-     ) ts
+fun p_e () : e p =
+    (choice [(fn (v,(e1,e2)) => Let(v,e1,e2)) <$> ((p_kw "let" *> p_var) >>> ((p_symb "=" *> delay p_e ()) >>> (p_kw "in" *> delay0 p_e))),
+             Var <$> p_var,
+             Int <$> p_int] ?? delay0 p_next) (fn (e,f) => f e)
 
-val res = case p_e ts of
-              OK(e,r,ts') =>
-              (case ts' of
-                   nil => Int.toString(eval nil e)
-                 | _ => raise Fail ("Syntax error at location " ^ Region.ppLoc (#2 r)))
+and p_next () : (e -> e) p =
+    (fn e2 => fn e1 => Add(e1,e2)) <$> (p_symb "+" *> delay0 p_e)
+
+val res = case parse (delay p_e ()) ts of
+              OK e => Int.toString(eval nil e)
             | NO(r,f) => f()
 
 val i = print ("Eval = " ^ res ^ "\n")

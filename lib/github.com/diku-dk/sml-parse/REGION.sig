@@ -4,17 +4,22 @@
 signature REGION = sig
   type srcname = string
   type loc = int * int * srcname
-  type reg = loc * loc
-
   val botloc  : loc
   val loc0    : srcname -> loc (* line 1, char 1 *)
   val newline : loc -> loc
   val next    : loc -> loc
   val lt      : loc -> loc -> bool
-  val wf      : reg -> bool
   val ppLoc   : loc -> string
+
+  (* Regions *)
+  type reg
+  val emp     : reg            (* the empty region *)
+  val wf      : reg -> bool
   val pp      : reg -> string
   val plus    : string -> reg -> reg -> reg
+
+  val mkReg   : loc * loc -> reg
+  val unReg   : reg -> (loc * loc) option
 end
 
 (**
