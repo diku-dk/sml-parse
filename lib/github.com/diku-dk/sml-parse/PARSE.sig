@@ -14,6 +14,7 @@ signature PARSE = sig
   type 'a p
 
   val parse   : 'a p -> tokenstream -> ('a, locerr) either
+  val parse'  : 'a p -> tokenstream -> ('a * tokenstream, locerr) either
   val accept  : 'a -> 'a p
   val next    : token p
   val reject  : string -> 'a p
