@@ -17,6 +17,11 @@ type tokenstream = (token*reg)list
 
 type 'a p = tokenstream -> ('a * reg * tokenstream, locerr) either
 
+fun parse' f ts =
+    case f ts of
+        OK(x,_,ts') => OK (x, ts')
+      | NO l => NO l
+
 fun parse f ts =
     case f ts of
         OK(x,_,_) => OK x
